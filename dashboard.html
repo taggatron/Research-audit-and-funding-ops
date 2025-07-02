@@ -269,6 +269,25 @@
       .summary { max-width: 100%; }
       table { font-size: 1em; }
     }
+    .journal-chip.color1:hover,
+    .journal-chip.color2:hover,
+    .journal-chip.color3:hover,
+    .journal-chip.color4:hover,
+    .journal-chip.color5:hover,
+    .journal-chip.color6:hover,
+    .journal-chip.color7:hover,
+    .journal-chip.color8:hover {
+      /* Only add blue glow, do not override background or color */
+      box-shadow: 0 0 0 4px #2d5be3cc, 0 4px 16px rgba(44,91,227,0.13);
+      outline: 2.5px solid #2d5be3;
+      outline-offset: 2px;
+      z-index: 1;
+    }
+    .journal-chip:hover {
+      /* Remove filter and color changes, only keep pointer and transition */
+      cursor: pointer;
+      transition: box-shadow 0.38s cubic-bezier(0.4,0,0.2,1), outline 0.38s cubic-bezier(0.4,0,0.2,1);
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -512,7 +531,7 @@
       const seen = new Set();
       let hasLancet = false;
       let hasSociologySampler = false;
-      // Try to get journals from different fields by grouping by subject area
+      // Try to get journals from different fields by grouping with subject area
       const byField = {};
       data.forEach(row => {
         let journal = (row['Journal Name'] || '').trim();
