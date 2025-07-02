@@ -626,14 +626,128 @@
         .then(text => {
           const data = parseCSV(text);
           const journals = getExampleJournals(data, 8);
+          // Map journal to papers
+          const journalToPapers = {};
+          data.forEach(row => {
+            let journal = (row['Journal Name'] || '').trim();
+            // Special case for Sociology Sampler
+            if (
+              row['Author Name(s)'] === "Kelly Laywood" &&
+              row['Paper Title'] &&
+              row['Paper Title'].startsWith("Adverse Childhood Experiences: How a trauma aware classroom")
+            ) {
+              journal = "Sociology Sampler";
+            }
+            if (!journalToPapers[journal]) journalToPapers[journal] = [];
+            if (row['Paper Title']) journalToPapers[journal].push({
+              title: row['Paper Title'],
+              link: row['Paper Link'] || row['Link'] || ''
+            });
+          });
           document.getElementById('journalExamples').innerHTML =
             journals.length
-              ? `<span style="font-size:1em;font-weight:500;color:#2d5be3;margin-right:0.7em;">Example Journals:</span>${renderJournalExamples(journals)}`
+              ? `<span style="font-size:1em;font-weight:500;color:#2d5be3;margin-right:0.7em;">Example Journals:</span>` +
+                journals.map((j, i) =>
+                  `<button class="journal-chip color${(i+1)%8}" data-journal="${encodeURIComponent(j)}">${j}</button>`
+                ).join('')
               : '';
+          // Add click event listeners for modal
+          document.querySelectorAll('.journal-chip').forEach(btn => {
+            btn.onclick = function() {
+              const journal = decodeURIComponent(this.getAttribute('data-journal'));
+              // Special case: Herpetological Bulletin
+              if (journal.toLowerCase().includes('herpetological bulletin')) {
+                // Add spinner HTML and iframe container, but attach onload via JS after modal is shown
+                let html = `<h3 style='color:#2d5be3;'>${journal}</h3>` +
+                  `<div style='font-weight:500;font-size:1.08em;margin-bottom:0.7em;color:#222;'>Captive husbandry and breeding of the Nguru spiny pygmy chameleon <i>Rhampholeon acuminatus</i></div>` +
+                  `<div id='hb-iframe-container' style='position:relative;width:90vw;max-width:900px;height:70vh;'>\
+                    <div id='hb-spinner' style='position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;z-index:2;background:rgba(255,255,255,0.7);'>\
+                      <div class='lds-dual-ring'></div>\
+                    </div>\
+                    <iframe id='hb-iframe' src='https://www.thebhs.org/publications/the-herpetological-bulletin/issue-number-158-winter-2021/3414-05-captive-husbandry-and-breeding-of-the-nguru-spiny-pygmy-chameleon-i-rhampholeon-acuminatus-i/file#:~:text=An%20ex-situ%20population%20of%20this%20species%20was%20recently,the%20successful%20breeding%2C%20hatching%20and%20rearing%20of%20juveniles.' \
+                    style='width:100%;height:100%;border-radius:12px;border:1.5px solid #a55eea;box-shadow:0 2px 16px rgba(44,62,80,0.13);margin:0;z-index:1;'\
+                    allowfullscreen\
+                  ></iframe>\
+                </div>\
+                <style>\
+                .lds-dual-ring {\
+                  display: inline-block;\
+                  width: 64px;\
+                  height: 64px;\
+                }\
+                .lds-dual-ring:after {\
+                  content: ' ';\
+                  display: block;\
+                  width: 46px;\
+                  height: 46px;\
+                  margin: 1px;\
+                  border-radius: 50%;\
+                  border: 6px solid #a55eea;\
+                  border-color: #a55eea transparent #2d5be3 transparent;\
+                  animation: lds-dual-ring 1.1s linear infinite;\
+                }\
+                @keyframes lds-dual-ring {\
+                  0% { transform: rotate(0deg); }\
+                  100% { transform: rotate(360deg); }\
+                }\
+                </style>`;
+                showJournalModal(html);
+                // Attach onload handler after modal is shown
+                setTimeout(function() {
+                  var iframe = document.getElementById('hb-iframe');
+                  var spinner = document.getElementById('hb-spinner');
+                  if (iframe && spinner) {
+                    iframe.onload = function() {
+                      spinner.style.display = 'none';
+                    };
+                  }
+                }, 100);
+                return;
+              }
+              const papers = journalToPapers[journal] || [];
+              let html = `<h3 style='color:#2d5be3;'>${journal}</h3>`;
+              if (papers.length) {
+                html += '<ul style="padding-left:1.2em;">' + papers.map(p =>
+                  `<li style='margin-bottom:0.7em;'><span style='font-weight:500;'>${p.title}</span>` +
+                  (p.link ? ` <a href='${p.link}' target='_blank' style='color:#a55eea;text-decoration:underline;font-size:0.98em;'>(View Paper)</a>` : '') +
+                  '</li>'
+                ).join('') + '</ul>';
+              } else {
+                html += '<div style="color:#888;">No papers found for this journal.</div>';
+              }
+              showJournalModal(html);
+            };
+          });
         })
         .catch(() => {
           document.getElementById('journalExamples').innerHTML = '';
         });
+    }
+
+    // Modal for journal papers
+    function showJournalModal(contentHtml) {
+      let modal = document.getElementById('journalModal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'journalModal';
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100vw';
+        modal.style.height = '100vh';
+        modal.style.background = 'rgba(44,62,80,0.18)';
+        modal.style.zIndex = '2000';
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        modal.innerHTML = `<div id='journalModalContent' style='background:#fff; border-radius:18px; box-shadow:0 8px 32px rgba(44,62,80,0.18); padding:2.5em 3em; min-width:400px; max-width:90vw; max-height:90vh; overflow:auto; position:relative; display:flex; flex-direction:column; align-items:center;'><button id='closeJournalModal' style='position:absolute; top:1em; right:1em; background:none; border:none; font-size:1.5em; color:#a55eea; cursor:pointer;'>&times;</button><div id='journalModalBody'></div></div>`;
+        document.body.appendChild(modal);
+        document.getElementById('closeJournalModal').onclick = function() {
+          modal.style.display = 'none';
+        };
+      }
+      document.getElementById('journalModalBody').innerHTML = contentHtml;
+      modal.style.display = 'flex';
     }
 
     document.getElementById('csvFile').addEventListener('change', function(e) {
