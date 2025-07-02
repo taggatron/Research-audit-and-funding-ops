@@ -700,7 +700,7 @@
 
     // Key Strategic Researchers Modal Logic
     var keyResearchers = [
-      { name: "Katy Upton", specialism: "Reptile & amphibian husbandry" },
+      { name: "Dr Katy Upton", specialism: "Reptile & amphibian husbandry" },
       { name: "Luke Peakman", specialism: "Cancer research, molecular biology" },
       { name: "Caroline Knight", specialism: "Domestic violence, safeguarding" },
       { name: "Kelly Laywood", specialism: "Safeguarding children, peer abuse" },
@@ -711,7 +711,10 @@
       { name: "Abishek Umashankar", specialism: "Audiology, hearing science" },
       { name: "Matt Prowse", specialism: "Marine engineering" },
       { name: "Conrad Saunders", specialism: "AI and cyber security" },
-      { name: "Dan Tagg", specialism: "AI and education" }
+      { name: "Dan Tagg", specialism: "AI and education" },
+      { name: "Dr Katy Hensby", specialism: "Education and Outdoor Education" },
+      { name: "Sarah Kettle-Buchanan", specialism: "Sociology and Child Development" },
+      { name: "Dr Katherine Jones", specialism: "Applied Psychology" }
     ];
     var fundingOpportunities = [
       { id: "fund1", name: "NIHR – Research for Patient Benefit (C 57, South West) nihr.ac.uk", field: "Health, nursing, audiology", url: "https://www.nihr.ac.uk/research-funding/funding-programmes/research-for-patient-benefit?utm_source=chatgpt.com" },
@@ -736,7 +739,7 @@
 
     // Updated staff with specialisms
     var keyResearchers = [
-      { name: "Katy Upton", specialism: "Reptile & amphibian husbandry" },
+      { name: "Dr Katy Upton", specialism: "Reptile & amphibian husbandry" },
       { name: "Luke Peakman", specialism: "Cancer research, molecular biology" },
       { name: "Caroline Knight", specialism: "Domestic violence, safeguarding" },
       { name: "Kelly Laywood", specialism: "Safeguarding children, peer abuse" },
@@ -747,7 +750,10 @@
       { name: "Abishek Umashankar", specialism: "Audiology, hearing science" },
       { name: "Matt Prowse", specialism: "Marine engineering" },
       { name: "Conrad Saunders", specialism: "AI and cyber security" },
-      { name: "Dan Tagg", specialism: "AI and education" }
+      { name: "Dan Tagg", specialism: "AI and education" },
+      { name: "Dr Katy Hensby", specialism: "Education and Outdoor Education" },
+      { name: "Sarah Kettle-Buchanan", specialism: "Sociology and Child Development" },
+      { name: "Dr Katherine Jones", specialism: "Applied Psychology" }
     ];
     // Funding opportunities with relevant fields
     var fundingOpportunities = [
@@ -763,11 +769,25 @@
     ];
     // Match logic: simple keyword match between specialism and funding field
     function getMatchesForResearcher(researcher) {
-      // Always attach Katy Upton and Stuart Collier to NERC – Pushing the Frontiers
-      if (researcher.name === "Katy Upton" || researcher.name === "Stuart Collier") {
+      // Always attach Dr Katy Upton and Stuart Collier to NERC – Pushing the Frontiers
+      if (researcher.name === "Dr Katy Upton" || researcher.name === "Stuart Collier") {
         return fundingOpportunities.filter(f =>
           f.field.split(',').some(k => researcher.specialism.toLowerCase().includes(k.trim())) ||
           f.name.startsWith("NERC – Pushing the Frontiers")
+        );
+      }
+      // Link Dr Katy Hensby to grants with 'education' or 'outdoor' in the field
+      if (researcher.name === "Dr Katy Hensby") {
+        return fundingOpportunities.filter(f =>
+          f.field.toLowerCase().includes('education') ||
+          f.field.toLowerCase().includes('outdoor')
+        );
+      }
+      // Link Dr Katherine Jones to grants with 'psychology' or 'applied' in the field
+      if (researcher.name === "Dr Katherine Jones") {
+        return fundingOpportunities.filter(f =>
+          f.field.toLowerCase().includes('psychology') ||
+          f.field.toLowerCase().includes('applied')
         );
       }
       const spec = researcher.specialism.toLowerCase();
