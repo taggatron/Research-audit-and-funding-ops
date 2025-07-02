@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Active Research Staff Publication Dashboard 24/25</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 2em;
+      min-height: 100vh;
+      color: #222;
+      /* Enhanced background: soft gradient with subtle pattern overlay */
+      background: 
+        linear-gradient(135deg, #e9e6f7 0%, #f6f8fa 100%),
+        repeating-linear-gradient(135deg, rgba(165,94,234,0.04) 0px, rgba(165,94,234,0.04) 2px, transparent 2px, transparent 40px);
+      position: relative;
+      z-index: 0;
+    }
+    body::before {
+      /* Subtle blurred purple circle for visual interest */
+      content: "";
+      position: fixed;
+      top: -180px;
+      left: -180px;
+      width: 420px;
+      height: 420px;
+      background: radial-gradient(circle at 60% 40%, #a55eea33 0%, #fff0 80%);
+      filter: blur(8px);
+      z-index: -1;
+      pointer-events: none;
+    }
+    body::after {
+      /* Subtle blurred blue circle for visual interest */
+      content: "";
+      position: fixed;
+      bottom: -160px;
+      right: -160px;
+      width: 340px;
+      height: 340px;
+      background: radial-gradient(circle at 40% 60%, #2d5be322 0%, #fff0 80%);
+      filter: blur(10px);
+      z-index: -1;
+      pointer-events: none;
+    }
+    .header-box {
+      display: flex;
+      align-items: center;
+      gap: 1.2em;
+      margin-bottom: 1.5em;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(44,62,80,0.10);
+      padding: 1.2em 2em 1.2em 1.2em;
+    }
+    .header-box h1 {
+      margin: 0;
+      color: #2d5be3;
+      font-size: 2em;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+    .header-box img {
+      height: 54px;
+      width: auto;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.07);
+    }
+    h1 {
+      color: #2d5be3;
+      letter-spacing: 1px;
+      margin-bottom: 1.5em;
+    }
+    .summary {
+      margin-bottom: 2em;
+      max-width: 700px;
+      flex: 2 1 500px;
+      margin-bottom: 0;
+    }
+    table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(44,62,80,0.10);
+      margin-bottom: 0.5em;
+      font-size: 1.08em;
+    }
+    th, td {
+      padding: 1.1em 1.5em;
+      text-align: left;
+    }
+    th {
+      background: linear-gradient(90deg, #2d5be3 80%, #1746b1 100%);
+      color: #fff;
+      font-weight: 600;
+      border-right: none;
+      border-bottom: 2px solid #e6e6e6;
+      letter-spacing: 0.5px;
+    }
+    tr {
+      border-bottom: 2px solid #e6e6e6;
+      transition: background 0.2s;
+    }
+    tr:last-child {
+      border-bottom: none;
+    }
+    td {
+      background: #f9fbfd;
+      border-bottom: none;
+      color: #222;
+    }
+    tr:nth-child(even) td {
+      background: #f0f4fa;
+    }
+    tr:hover td {
+      background: #eaf1fb;
+    }
+    /* Highlight last row in purple */
+    tr.summary-masters-row th
+    {
+      background: linear-gradient(90deg, #a55eea 80%, #8854d0 100%) !important;
+      color: #fff !important;
+      font-weight: 600;
+    }
+    #exportBtn {
+      margin-top: 1em;
+      background: #2d5be3;
+      color: #fff;
+      border: none;
+      padding: 0.7em 1.5em;
+      border-radius: 6px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      margin-right: 1em;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.07);
+    }
+    #exportBtn:hover {
+      background: #1746b1;
+      box-shadow: 0 4px 16px rgba(44,62,80,0.13);
+    }
+    #csvFile {
+      margin-bottom: 1em;
+    }
+    .chart-container {
+      max-width: 700px;
+      margin: 2em 0 0 0;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(44,62,80,0.10);
+      padding: 2em;
+    }
+    .dashboard-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2em;
+      align-items: flex-start;
+    }
+    .summary-journals-col {
+      display: grid;
+      grid-template-columns: 2.2fr 1fr 0.7fr;
+      align-items: start;
+      gap: 2em;
+      margin-bottom: 2em;
+      width: 100%;
+    }
+    .summary {
+      max-width: 700px;
+      flex: 2 1 500px;
+      margin-bottom: 0;
+    }
+    .journal-examples-col {
+      display: flex;
+      flex-direction: column;
+      min-width: 220px;
+      max-width: 320px;
+      flex: 1 1 220px;
+    }
+    .journal-examples-label {
+      font-size: 1em;
+      font-weight: 500;
+      color: #2d5be3;
+      margin-bottom: 0.5em;
+    }
+    .journal-examples {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7em;
+      align-items: flex-start;
+      margin: 0;
+    }
+    .journal-chip {
+      display: inline-block;
+      padding: 0.5em 1.1em;
+      border-radius: 2em;
+      font-size: 1em;
+      font-weight: 500;
+      color: #fff;
+      background: linear-gradient(90deg, #2d5be3 80%, #1746b1 100%);
+      box-shadow: 0 2px 8px rgba(44,62,80,0.07);
+      transition: background 0.2s, color 0.2s;
+      border: none;
+      outline: none;
+      cursor: default;
+      letter-spacing: 0.2px;
+    }
+    .journal-chip.color1 { background: linear-gradient(90deg, #20bf6b 80%, #0b8457 100%); }
+    .journal-chip.color2 { background: linear-gradient(90deg, #f7b731 80%, #f5a623 100%); }
+    .journal-chip.color3 { background: linear-gradient(90deg, #8854d0 80%, #5f27cd 100%); }
+    .journal-chip.color4 { background: linear-gradient(90deg, #eb3b5a 80%, #fa8231 100%); }
+    .journal-chip.color5 { background: linear-gradient(90deg, #45aaf2 80%, #3867d6 100%); }
+    .journal-chip.color6 { background: linear-gradient(90deg, #fd9644 80%, #fa8231 100%); }
+    .journal-chip.color7 { background: linear-gradient(90deg, #26de81 80%, #20bf6b 100%); }
+    .journal-chip.color8 { background: linear-gradient(90deg, #a55eea 80%, #8854d0 100%); }
+    .active-research-circle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 110px;
+      min-height: 110px;
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2d5be3 60%, #a55eea 100%);
+      box-shadow: 0 4px 24px rgba(44,62,80,0.13);
+      margin: 0 auto;
+      color: #fff;
+      font-weight: 600;
+      font-size: 1em;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .active-research-circle .circle-text {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      font-size: 1em;
+      line-height: 1.2;
+    }
+    .active-research-circle .circle-percent {
+      font-size: 1.7em;
+      font-weight: 700;
+      margin-top: 0.3em;
+      color: #fff;
+    }
+    @media (max-width: 900px) {
+      .dashboard-flex { flex-direction: column; gap: 0; }
+      .summary-journals-col {
+        grid-template-columns: 1fr;
+      }
+      .summary { max-width: 100%; }
+      .journal-examples-col { max-width: 100%; }
+      .active-research-circle {
+        margin: 1em auto 0 auto;
+        width: 150px;
+        height: 150px;
+        min-width: 150px;
+        min-height: 150px;
+      }
+      .summary-journals-col {
+        flex-wrap: wrap;
+      }
+    }
+    @media (max-width: 700px) {
+      .chart-container { padding: 1em; }
+      .summary { max-width: 100%; }
+      table { font-size: 1em; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+  <div class="header-box">
+    <h1>Active Research Staff Publication Dashboard 24/25</h1>
+    <img src="SDC_logo_simple.jpeg" alt="SDC Logo" />
+  </div>
+  <input type="file" id="csvFile" accept=".csv" style="display:none;" />
+  <div class="dashboard-flex">
+    <div class="summary-journals-col">
+      <div class="summary" id="summary"></div>
+      <div class="journal-examples-col">
+        <div id="journalExamples" class="journal-examples"></div>
+      </div>
+      <div class="active-research-circle">
+        <span class="circle-text">Active research engaged staff<br><span class="circle-percent">25%</span></span>
+      </div>
+    </div>
+    <div>
+      <div class="chart-container" style="display:none;">
+        <canvas id="journalPieChart"></canvas>
+      </div>
+    </div>
+  </div>
+  <button id="exportBtn" style="display:none;">Export Summary as CSV</button>
+  <button id="keyResearchersBtn" style="background: #a55eea; color: #fff; border: none; padding: 0.7em 0.3em; border-radius: 6px; font-size: 1em; cursor: pointer; margin-bottom: 0.2em; margin-right: 1em; box-shadow: 0 2px 8px rgba(44,62,80,0.07);">Key Strategic Researchers</button>
+  <!-- Modal for Key Strategic Researchers -->
+  <div id="keyResearchersModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(44,62,80,0.18); z-index:1000; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:18px; box-shadow:0 8px 32px rgba(44,62,80,0.18); padding:3em 4em; min-width:900px; min-height:700px; max-width:98vw; max-height:96vh; position:relative; display:flex; flex-direction:column; align-items:center;">
+      <button id="closeKeyResearchersModal" style="position:absolute; top:1em; right:1em; background:none; border:none; font-size:1.5em; color:#a55eea; cursor:pointer;">&times;</button>
+      <div style="display:flex; align-items:center; justify-content:space-between; width:100%; margin-bottom:0.2em;">
+        <h2 style="color:#2d5be3; font-size:2.2em; margin:0;">Key Strategic Researchers</h2>
+        <!-- The close button is already absolutely positioned, so no need to move it here -->
+      </div>
+      <div id="researcherGraph" style="width:1100px; height:650px; max-width:90vw; max-height:80vh; margin-bottom:2em;"></div>
+      <div style="margin-top:auto; margin-bottom:0.5em; color:#666; font-size:1.15em; align-self:flex-end;">(Funding opportunities are matched to staff specialisms)</div>
+    </div>
+  </div>
+  <script>
+    let chartInstance = null;
+    let lastJournalData = null;
+
+    function parseCSV(text) {
+      const lines = text.split(/\r?\n/).filter(Boolean);
+      const headers = lines[0].split(',');
+      return lines.slice(1).map(line => {
+        // Handle quoted fields with commas
+        const values = [];
+        let inQuotes = false, value = '';
+        for (let i = 0, c; i < line.length; ++i) {
+          c = line[i];
+          if (c === '"') inQuotes = !inQuotes;
+          else if (c === ',' && !inQuotes) { values.push(value); value = ''; }
+          else value += c;
+        }
+        values.push(value);
+        const obj = {};
+        headers.forEach((h, i) => obj[h.trim()] = (values[i] || '').trim());
+        return obj;
+      });
+    }
+
+    function summarize(data) {
+      const staffSet = new Set();
+      let mastersCount = 0;
+      let totalCitations = 0;
+      data.forEach(row => {
+        if (row['Author Name(s)']) staffSet.add(row['Author Name(s)']);
+        // Masters/MSc/MA in Title or Department or Qualifications
+        const fields = [
+          row['Title'] || '',
+          row['Department'] || '',
+          row['Author Name(s)'] || ''
+        ].join(' ').toLowerCase();
+        if (fields.match(/\b(master|msc|ma)\b/)) mastersCount++;
+        // Citations
+        const citations = parseInt(row['Citations']);
+        if (!isNaN(citations)) totalCitations += citations;
+      });
+      return {
+        staffCount: staffSet.size,
+        paperCount: data.length,
+        mastersCount,
+        totalCitations
+      };
+    }
+
+    function renderSummary(summary) {
+      return `
+        <table id="summaryTable">
+          <tr><th>Number of Different 'Actively' Publishing Staff</th><td>${summary.staffCount}</td></tr>
+          <tr><th>Number of Papers Published</th><td>${summary.paperCount}</td></tr>
+          <tr><th>Total Academic Citations</th><td>${summary.totalCitations}</td></tr>
+          <tr><th>Presented at a conference / Attended a conference</th><td>16/74</td></tr>
+          <tr class="summary-masters-row"><th>Total Number of Masters Degrees (College)</th><td>26</td></tr>
+          <tr class="summary-masters-row"><th>Total Number of pHD Degrees / Working towards pHD (College)</th><td>4/4</td></tr>
+        </table>
+      `;
+    }
+
+    // Export the summary table as CSV, transposed (rows become columns)
+    function exportSummaryTableAsCSV() {
+      const table = document.getElementById('summaryTable');
+      if (!table) return;
+      const rows = Array.from(table.querySelectorAll('tr'));
+      const headers = rows.map(row => row.querySelector('th').innerText.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim());
+      const values = rows.map(row => row.querySelector('td').innerText.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim());
+      // Transpose: headers in first row, values in second row
+      const csv = [headers.join(','), values.join(',')].join('\n');
+      const blob = new Blob([csv], {type: 'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'summary_export.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function summaryToCSV(summary) {
+      return [
+        'Number of Different Staff,Number of Papers Published,Number of Staff with Masters/MSc/MA,Total Academic Citations',
+        `${summary.staffCount},${summary.paperCount},${summary.mastersCount},${summary.totalCitations}`
+      ].join('\n');
+    }
+
+    function parseSummaryCSV(text) {
+      const lines = text.trim().split(/\r?\n/);
+      if (lines.length < 2) return null;
+      const values = lines[1].split(',');
+      return {
+        staffCount: values[0],
+        paperCount: values[1],
+        mastersCount: values[2],
+        totalCitations: values[3]
+      };
+    }
+
+    function getJournalData(data) {
+      // Exclude journals that start with any of these prefixes (case-insensitive, trimmed)
+      const excludePrefixes = [
+        "Aug-19",
+        "Gerado Garcia",
+        "Gerardo Garcia", // typo and correct spelling
+        "Katy Upton",
+        "N/A",
+        "Mar-22",
+        "Nov-19",
+        "Not Specified",
+        "Subramanian"
+      ];
+      const journalMap = {};
+      data.forEach(row => {
+        const journal = (row['Journal Name'] || '').trim();
+        // Exclude if journal starts with any excluded prefix (case-insensitive)
+        if (
+          !journal ||
+          excludePrefixes.some(prefix => journal.toLowerCase().startsWith(prefix.toLowerCase()))
+        ) {
+          return;
+        }
+        const paperTitle = row['Paper Title'] || row['Article Title'] || '';
+        if (!journalMap[journal]) journalMap[journal] = [];
+        if (paperTitle) journalMap[journal].push(paperTitle);
+      });
+      const labels = Object.keys(journalMap);
+      const counts = labels.map(j => journalMap[j].length);
+      const tooltips = labels.map(j => journalMap[j].join('\n'));
+      return { labels, counts, tooltips };
+    }
+
+    function renderPieChart(journalData) {
+      const ctx = document.getElementById('journalPieChart').getContext('2d');
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: journalData.labels,
+          datasets: [{
+            data: journalData.counts,
+            backgroundColor: [
+              '#2d5be3', '#f7b731', '#20bf6b', '#eb3b5a', '#8854d0', '#fd9644', '#26de81', '#a55eea', '#778ca3', '#fc5c65', '#45aaf2'
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                font: { size: 15 }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const idx = context.dataIndex;
+                  const label = context.label || '';
+                  const count = context.dataset.data[idx];
+                  const papers = journalData.tooltips[idx];
+                  return [
+                    label + ': ' + count + ' paper(s)',
+                    ...papers.split('\n').map(t => '• ' + t)
+                  ];
+                }
+              }
+            },
+            title: {
+              display: true,
+              text: 'Distribution of Papers by Journal',
+              font: { size: 20 }
+            }
+          }
+        }
+      });
+    }
+
+    function clearPieChart() {
+      if (chartInstance) {
+        chartInstance.destroy();
+        chartInstance = null;
+      }
+    }
+
+    // Helper to get unique, valid journal names for examples (same filter as pie chart)
+    function getExampleJournals(data, count = 8) {
+      const excludePrefixes = [
+        "Aug-19",
+        "Gerado Garcia",
+        "Gerardo Garcia",
+        "Katy Upton",
+        "N/A",
+        "Mar-22",
+        "Nov-19",
+        "Not Specified",
+        "Subramanian"
+      ];
+      const journals = [];
+      const seen = new Set();
+      let hasLancet = false;
+      let hasSociologySampler = false;
+      // Try to get journals from different fields by grouping by subject area
+      const byField = {};
+      data.forEach(row => {
+        let journal = (row['Journal Name'] || '').trim();
+        const subject = (row['Subject Area'] || '').trim();
+
+        // Special case: For Kelly Laywood's "Adverse Childhood Experiences..." entry, set journal to "Sociology Sampler"
+        if (
+          row['Author Name(s)'] === "Kelly Laywood" &&
+          row['Paper Title'] &&
+          row['Paper Title'].startsWith("Adverse Childhood Experiences: How a trauma aware classroom")
+        ) {
+          journal = "Sociology Sampler";
+        }
+
+        if (
+          !journal ||
+          excludePrefixes.some(prefix => journal.toLowerCase().startsWith(prefix.toLowerCase())) ||
+          seen.has(journal)
+        ) {
+          return;
+        }
+        // Hide "Bulletin" and instead ensure "The Lancet Planetary Health" is included
+        if (journal.toLowerCase() === "bulletin") {
+          return;
+        }
+        if (journal === "The Lancet Planetary Health") {
+          hasLancet = true;
+        }
+        if (journal === "Sociology Sampler") {
+          hasSociologySampler = true;
+        }
+        seen.add(journal);
+        if (!byField[subject]) byField[subject] = [];
+        byField[subject].push(journal);
+      });
+      // Flatten, picking one from each field first, then fill up to count
+      Object.values(byField).forEach(arr => {
+        if (arr.length) journals.push(arr[0]);
+      });
+      // If not enough, fill with remaining unique journals
+      if (journals.length < count) {
+        data.forEach(row => {
+          let journal = (row['Journal Name'] || '').trim();
+          // Special case for Sociology Sampler
+          if (
+            row['Author Name(s)'] === "Kelly Laywood" &&
+            row['Paper Title'] &&
+            row['Paper Title'].startsWith("Adverse Childhood Experiences: How a trauma aware classroom")
+          ) {
+            journal = "Sociology Sampler";
+          }
+          if (
+            !journal ||
+            excludePrefixes.some(prefix => journal.toLowerCase().startsWith(prefix.toLowerCase())) ||
+            journals.includes(journal) ||
+            journal.toLowerCase() === "bulletin"
+          ) {
+            return;
+          }
+          journals.push(journal);
+        });
+      }
+      // Ensure "The Lancet Planetary Health" is present, replacing "Bulletin" if needed
+      if (!hasLancet) {
+        for (const row of data) {
+          if ((row['Journal Name'] || '').trim() === "The Lancet Planetary Health" && !journals.includes("The Lancet Planetary Health")) {
+            const idx = journals.findIndex(j => j.toLowerCase() === "bulletin");
+            if (idx !== -1) {
+              journals[idx] = "The Lancet Planetary Health";
+            } else if (journals.length < count) {
+              journals.push("The Lancet Planetary Health");
+            }
+            break;
+          }
+        }
+      }
+      // Ensure "Sociology Sampler" is present
+      if (!hasSociologySampler) {
+        for (const row of data) {
+          if (
+            row['Author Name(s)'] === "Kelly Laywood" &&
+            row['Paper Title'] &&
+            row['Paper Title'].startsWith("Adverse Childhood Experiences: How a trauma aware classroom")
+          ) {
+            if (!journals.includes("Sociology Sampler")) {
+              journals.push("Sociology Sampler");
+            }
+            break;
+          }
+        }
+      }
+      // Remove "Bulletin" if present
+      return journals.filter(j => j.toLowerCase() !== "bulletin").slice(0, count);
+    }
+
+    // Render journal examples as colored chips
+    function renderJournalExamples(journals) {
+      const colors = ['','color1','color2','color3','color4','color5','color6','color7','color8'];
+      return journals.map((j, i) =>
+        `<span class="journal-chip ${colors[(i+1)%colors.length]}">${j}</span>`
+      ).join('');
+    }
+
+    // Show journal examples next to summary table
+    function showJournalExamplesFromCSV() {
+      fetch('extracted_info.csv')
+        .then(response => {
+          if (!response.ok) throw new Error('CSV not found');
+          return response.text();
+        })
+        .then(text => {
+          const data = parseCSV(text);
+          const journals = getExampleJournals(data, 8);
+          document.getElementById('journalExamples').innerHTML =
+            journals.length
+              ? `<span style="font-size:1em;font-weight:500;color:#2d5be3;margin-right:0.7em;">Example Journals:</span>${renderJournalExamples(journals)}`
+              : '';
+        })
+        .catch(() => {
+          document.getElementById('journalExamples').innerHTML = '';
+        });
+    }
+
+    document.getElementById('csvFile').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const csvText = evt.target.result;
+        const data = parseCSV(csvText);
+        const summary = summarize(data);
+        document.getElementById('summary').innerHTML = renderSummary(summary);
+        document.getElementById('exportBtn').style.display = 'inline-block';
+        document.getElementById('exportBtn').onclick = exportSummaryTableAsCSV;
+        // Pie chart
+        const journalData = getJournalData(data);
+        lastJournalData = journalData;
+        renderPieChart(journalData);
+      };
+      reader.readAsText(file);
+    });
+
+    // Load summary from extracted_info_summary.csv and pie chart from extracted_info.csv on page load
+    window.addEventListener('DOMContentLoaded', function() {
+      // Load summary as before
+      fetch('extracted_info_summary.csv')
+        .then(response => {
+          if (!response.ok) throw new Error('Summary CSV not found');
+          return response.text();
+        })
+        .then(text => {
+          const summary = parseSummaryCSV(text);
+          if (summary) {
+            document.getElementById('summary').innerHTML = renderSummary(summary);
+            document.getElementById('exportBtn').style.display = 'inline-block';
+            document.getElementById('exportBtn').onclick = exportSummaryTableAsCSV;
+          }
+        })
+        .catch(() => {
+          // Do nothing if not found
+        });
+
+      // Load extracted_info.csv for pie chart
+      fetch('extracted_info.csv')
+        .then(response => {
+          if (!response.ok) throw new Error('CSV not found');
+          return response.text();
+        })
+        .then(text => {
+          const data = parseCSV(text);
+          const journalData = getJournalData(data);
+          lastJournalData = journalData;
+          renderPieChart(journalData);
+        })
+        .catch(() => {
+          clearPieChart();
+        });
+
+      // Load journal examples
+      showJournalExamplesFromCSV();
+    });
+
+    // On page load, clear pie chart
+    clearPieChart();
+
+    // Key Strategic Researchers Modal Logic
+    var keyResearchers = [
+      { name: "Katy Upton", specialism: "Reptile & amphibian husbandry" },
+      { name: "Luke Peakman", specialism: "Cancer research, molecular biology" },
+      { name: "Caroline Knight", specialism: "Domestic violence, safeguarding" },
+      { name: "Kelly Laywood", specialism: "Safeguarding children, peer abuse" },
+      { name: "Kenneth Armstrong", specialism: "Inflammation biomarkers" },
+      { name: "Ella Reynolds", specialism: "Nursing, health psychology" },
+      { name: "Stuart Collier", specialism: "Marine bioaccumulation" },
+      { name: "Gabriele Bianco", specialism: "Speech & language pathology" },
+      { name: "Abishek Umashankar", specialism: "Audiology, hearing science" },
+      { name: "Matt Prowse", specialism: "Marine engineering" },
+      { name: "Conrad Saunders", specialism: "AI and cyber security" },
+      { name: "Dan Tagg", specialism: "AI and education" }
+    ];
+    var fundingOpportunities = [
+      { id: "fund1", name: "NIHR – Research for Patient Benefit (C 57, South West) nihr.ac.uk", field: "Health, nursing, audiology", url: "https://www.nihr.ac.uk/research-funding/funding-programmes/research-for-patient-benefit?utm_source=chatgpt.com" },
+      { id: "fund2", name: "NIHR – Health & Social Care Delivery Research (HSDR) nihr.ac.uk", field: "Health-service orgs, nursing, social care", url: "https://www.nihr.ac.uk/research-funding/funding-programmes/health-and-social-care-delivery-research?utm_source=chatgpt.com" },
+      { id: "fund3", name: "NIHR – Research Programme for Social Care nihr.ac.uk", field: "Social care, sociology", url: "https://www.nihr.ac.uk/research-funding/funding-programmes/research-programme-for-social-care?utm_source=chatgpt.com" },
+      { id: "fund4", name: "NIHR – Public Health Research (open call) nihr.ac.uk", field: "Public health, workplace health", url: "https://www.nihr.ac.uk/research-funding/funding-programmes/public-health-research?utm_source=chatgpt.com" },
+      { id: "fund5", name: "NERC – Pushing the Frontiers (July 2025 round) ukri.org", field: "Environmental, marine science, marine bioaccumulation", url: "https://www.ukri.org/opportunity/pushing-the-frontiers-of-environmental-research-july-2025/?utm_source=chatgpt.com" },
+      // ...add other funding opportunities from the CSV as needed...
+    ];
+
+    function showKeyResearchersModal() {
+      document.getElementById('keyResearchersModal').style.display = 'flex';
+      document.body.style.overflow = 'hidden'; // Disable background scroll
+      renderResearcherGraph();
+    }
+    function hideKeyResearchersModal() {
+      document.getElementById('keyResearchersModal').style.display = 'none';
+      document.body.style.overflow = ''; // Restore scroll
+    }
+    document.getElementById('keyResearchersBtn').onclick = showKeyResearchersModal;
+    document.getElementById('closeKeyResearchersModal').onclick = hideKeyResearchersModal;
+
+    // Updated staff with specialisms
+    var keyResearchers = [
+      { name: "Katy Upton", specialism: "Reptile & amphibian husbandry" },
+      { name: "Luke Peakman", specialism: "Cancer research, molecular biology" },
+      { name: "Caroline Knight", specialism: "Domestic violence, safeguarding" },
+      { name: "Kelly Laywood", specialism: "Safeguarding children, peer abuse" },
+      { name: "Kenneth Armstrong", specialism: "Inflammation biomarkers" },
+      { name: "Ella Reynolds", specialism: "Nursing, health psychology" },
+      { name: "Stuart Collier", specialism: "Marine bioaccumulation" },
+      { name: "Gabriele Bianco", specialism: "Speech & language pathology" },
+      { name: "Abishek Umashankar", specialism: "Audiology, hearing science" },
+      { name: "Matt Prowse", specialism: "Marine engineering" },
+      { name: "Conrad Saunders", specialism: "AI and cyber security" },
+      { name: "Dan Tagg", specialism: "AI and education" }
+    ];
+    // Funding opportunities with relevant fields
+    var fundingOpportunities = [
+      { id: "fund1", name: "DfE – Skills Bootcamps", field: "AI, education, cyber", url: "www.find-tender.service.gov.uk/Notice/012492-2025?utm_source=chatgpt.com" },
+      { id: "fund2", name: "AWS – UK Education Cyber Grant", field: "cyber security, education", url: "aws.amazon.com/blogs/publicsector/aws-launches-5-million-cyber-education-grant-to-boost-security-in-the-uk/?utm_source=chatgpt.com" },
+      { id: "fund3", name: "Edge Foundation – Innovation Fund (EIF)", field: "education innovation", url: "youngkandc.org.uk/funding/edge-foundation-innovation-grant-fund?utm_source=chatgpt.com" },
+      { id: "fund4", name: "Innovate UK – Knowledge Transfer Partnership", field: "AI, STEM, digital, health", url: "www.ukri.org/councils/innovate-uk/guidance-for-applicants/guidance-for-specific-funds/knowledge-transfer-partnership-guidance/dates-and-deadlines-for-ktp-applicants/?utm_source=chatgpt.com" },
+      { id: "fund5", name: "NERC – Pushing the Frontiers", field: "marine science", url: "www.ukri.org/opportunity/pushing-the-frontiers-of-environmental-research-july-2025/?utm_source=chatgpt.com" },
+      { id: "fund6", name: "Crown Estate – Offshore-Wind Supply-Chain Accelerator", field: "marine engineering", url: "www.thecrownestate.co.uk/our-business/marine/supply-chain-accelerator-fund?utm_source=chatgpt.com" },
+      { id: "fund7", name: "Innovate UK Launchpad – Marine & Maritime", field: "marine tech R&D", url: "apply-for-innovation-funding.service.gov.uk/competition/2215/overview/67b86d6c-bab9-4a01-aacc-3da2e57edc99?utm_source=chatgpt.com" },
+      { id: "fund8", name: "UKRI – Future Leaders Fellowship", field: "AI, cyber", url: "www.ukri.org/opportunity/future-leaders-fellowships-round-10/?utm_source=chatgpt.com" },
+      { id: "fund9", name: "Ufi VocTech Trust – VocTech Activate", field: "EdTech, FE skills", url: "ufi.co.uk/grant-funding/voctech-activate/how-to-apply/?utm_source=chatgpt.com" }
+    ];
+    // Match logic: simple keyword match between specialism and funding field
+    function getMatchesForResearcher(researcher) {
+      // Always attach Katy Upton and Stuart Collier to NERC – Pushing the Frontiers
+      if (researcher.name === "Katy Upton" || researcher.name === "Stuart Collier") {
+        return fundingOpportunities.filter(f =>
+          f.field.split(',').some(k => researcher.specialism.toLowerCase().includes(k.trim())) ||
+          f.name.startsWith("NERC – Pushing the Frontiers")
+        );
+      }
+      const spec = researcher.specialism.toLowerCase();
+      return fundingOpportunities.filter(f =>
+        f.field.split(',').some(k => spec.includes(k.trim()))
+      );
+    }
+    function renderResearcherGraph() {
+      const width = 1100, height = 650;
+      // Build nodes and links
+      const nodes = keyResearchers.map((r, i) => ({ id: 'r'+i, name: r.name, specialism: r.specialism, type: 'researcher' }))
+        .concat(fundingOpportunities.map(f => ({ id: f.id, name: f.name, type: 'funding', url: f.url })));
+      const links = [];
+      keyResearchers.forEach((r, i) => {
+        getMatchesForResearcher(r).forEach(f => {
+          links.push({ source: 'r'+i, target: f.id });
+        });
+      });
+      // Responsive scaling for node and text size
+      const staffCount = keyResearchers.length;
+      const fundCount = fundingOpportunities.length;
+      const totalNodes = staffCount + fundCount;
+      // Scale node size and text based on node count
+      const baseCircle = 42;
+      const baseRectW = 180, baseRectH = 90;
+      const minCircle = 28, minRectW = 110, minRectH = 60;
+      const circleR = Math.max(minCircle, baseCircle - (totalNodes-10)*2.5);
+      const rectW = Math.max(minRectW, baseRectW - (totalNodes-10)*8);
+      const rectH = Math.max(minRectH, baseRectH - (totalNodes-10)*4);
+      const nameFont = Math.max(0.85, 1.13 - (totalNodes-10)*0.04) + 'em';
+      const specFont = Math.max(0.75, 0.98 - (totalNodes-10)*0.03) + 'em';
+      const fundFont = Math.max(0.85, 1.13 - (totalNodes-10)*0.04) + 'em';
+      // Adjust force strength for more nodes
+      // Reduce repulsive force so nodes cluster more closely
+      const chargeStrength = -80; // Much less negative than before
+      const collisionR = d => d.type === 'funding' ? rectW/2+10 : circleR+10;
+      // Clear previous SVG
+      const container = document.getElementById('researcherGraph');
+      container.innerHTML = '';
+      const svg = d3.select(container)
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height);
+      const simulation = d3.forceSimulation(nodes)
+        .force('link', d3.forceLink(links).id(d => d.id).distance(160))
+        .force('charge', d3.forceManyBody().strength(chargeStrength))
+        .force('center', d3.forceCenter(width/2, height/2))
+        .force('collision', d3.forceCollide().radius(collisionR))
+        // Custom force to move NERC node and Katy/Stuart higher up
+        .force('nercY', function(alpha) {
+          nodes.forEach(function(d) {
+            if (d.type === 'funding' && d.name.startsWith('NERC – Pushing the Frontiers')) {
+              d.y += (-height/2.5 - d.y) * 0.15 * alpha; // Pull NERC node up
+            }
+            if (d.type === 'researcher' && (d.name === 'Katy Upton' || d.name === 'Stuart Collier')) {
+              d.y += (-height/3 - d.y) * 0.12 * alpha; // Pull Katy/Stuart up, but not as high
+            }
+          });
+        })
+        // Add a custom force to repel researcher labels from each other
+        .force('labelRepel', function(alpha) {
+          // Only apply to researcher nodes
+          const researcherNodes = nodes.filter(d => d.type === 'researcher');
+          for (let i = 0; i < researcherNodes.length; i++) {
+            for (let j = i + 1; j < researcherNodes.length; j++) {
+              const a = researcherNodes[i];
+              const b = researcherNodes[j];
+              // Estimate label positions (below node center)
+              const ay = a.y + circleR + 16; // name label y
+              const by = b.y + circleR + 16;
+              const ax = a.x;
+              const bx = b.x;
+              // Estimate label box height (name + role)
+              const labelHeight = 36 + 18; // name + role spacing
+              const minDist = 44; // minimum vertical distance between labels
+              // If labels are too close vertically and horizontally, push apart
+              if (Math.abs(ax - bx) < 90 && Math.abs(ay - by) < minDist) {
+                const sign = ay < by ? -1 : 1;
+                const force = 2 * alpha; // tweak as needed
+                a.y += sign * force;
+                b.y -= sign * force;
+              }
+            }
+          }
+        })
+        // Add a custom force to repel nodes from the edges of the SVG container
+        .force('edgeRepel', function(alpha) {
+          const padding = 40; // Minimum distance from edge for node center
+          const labelHeight = 60; // Space for name + specialism text
+          nodes.forEach(function(d) {
+            let r = d.type === 'funding' ? rectH/2 : circleR;
+            // Repel from left
+            if (d.x - r < padding) d.x += (padding - (d.x - r)) * 0.15 * alpha;
+            // Repel from right
+            if (d.x + r > width - padding) d.x -= ((d.x + r) - (width - padding)) * 0.15 * alpha;
+            // Repel from top
+            if (d.y - r < padding) d.y += (padding - (d.y - r)) * 0.15 * alpha;
+            // Repel from bottom (account for label height)
+            let bottomLimit = height - padding - (d.type === 'researcher' ? labelHeight : 0);
+            if (d.y + r > bottomLimit) d.y -= ((d.y + r) - bottomLimit) * 0.25 * alpha;
+          });
+        });
+      const link = svg.append('g')
+        .attr('stroke', '#bbb')
+        .attr('stroke-width', 2)
+        .selectAll('line')
+        .data(links)
+        .enter().append('line');
+      const node = svg.append('g')
+        .selectAll('g')
+        .data(nodes)
+        .enter().append('g')
+        .attr('class', d => d.type);
+      // Draw researcher nodes as circles
+      node.filter(d => d.type === 'researcher')
+        .append('circle')
+        .attr('r', circleR)
+        .attr('fill', '#a55eea')
+        .attr('stroke', '#fff')
+        .attr('stroke-width', 3)
+        .attr('opacity', 0.93)
+        .on('mouseover', function() { d3.select(this).attr('fill', '#8854d0'); })
+        .on('mouseout', function() { d3.select(this).attr('fill', '#a55eea'); });
+      // Draw funding nodes as large rounded rectangles
+      node.filter(d => d.type === 'funding')
+        .append('rect')
+        .attr('x', -rectW/2)
+        .attr('y', -rectH/2)
+        .attr('rx', 22)
+        .attr('ry', 22)
+        .attr('width', rectW)
+        .attr('height', rectH)
+        .attr('fill', '#2d5be3')
+        .attr('stroke', '#fff')
+        .attr('stroke-width', 3)
+        .attr('opacity', 0.93)
+        .on('mouseover', function() { d3.select(this).attr('fill', '#1746b1'); })
+        .on('mouseout', function() { d3.select(this).attr('fill', '#2d5be3'); })
+        .on('click', function(e, d) {
+          if (d.url) window.open('https://' + d.url, '_blank');
+        });
+      // Researcher node: name (below), specialism (below name)
+      node.filter(d => d.type === 'researcher')
+        .append('text')
+        .attr('text-anchor', 'middle')
+        .attr('y', circleR+16)
+        .attr('font-size', nameFont)
+        .attr('fill', '#222')
+        .attr('font-weight', 700)
+        .text(d => d.name.length > 18 ? d.name.slice(0,17)+'…' : d.name);
+      node.filter(d => d.type === 'researcher')
+        .append('text')
+        .attr('text-anchor', 'middle')
+        .attr('y', circleR+36)
+        .attr('font-size', specFont)
+        .attr('fill', '#222')
+        .attr('font-weight', 400)
+        .text(d => d.specialism);
+      // Funding node: name centered in rectangle, with wrapping and smaller font
+      node.filter(d => d.type === 'funding')
+        .each(function(d) {
+          const g = d3.select(this);
+          const words = d.name.split(/\s+/);
+          const maxWidth = rectW - 2; // padding inside rect
+          const lineHeight = 12; // px
+          let line = [], lines = [], testLine = '', tspan;
+          // Create a temp SVG text to measure
+          const tempText = svg.append('text').attr('font-size', fundFont).attr('font-family', 'Segoe UI, Arial, sans-serif').style('visibility', 'hidden');
+          for (let i = 0; i < words.length; i++) {
+            testLine = line.concat(words[i]).join(' ');
+            tempText.text(testLine);
+            if (tempText.node().getComputedTextLength() > maxWidth && line.length) {
+              lines.push(line.join(' '));
+              line = [words[i]];
+            } else {
+              line.push(words[i]);
+            }
+          }
+          lines.push(line.join(' '));
+          tempText.remove();
+          // Add tspans for each line
+          const text = g.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('y', -((lines.length-1)/2)*lineHeight + 6)
+            .attr('font-size', '0.7em') // smaller font size
+            .attr('fill', '#fff')
+            .attr('font-weight', 600)
+            .attr('pointer-events', 'none')
+            .attr('font-family', 'Segoe UI, Arial, sans-serif');
+          lines.forEach((l, i) => {
+            text.append('tspan')
+              .attr('x', 0)
+              .attr('dy', i === 0 ? 0 : lineHeight)
+              .text(l);
+          });
+        });
+      simulation.on('tick', () => {
+        link
+          .attr('x1', d => d.source.x)
+          .attr('y1', d => d.source.y)
+          .attr('x2', d => d.target.x)
+          .attr('y2', d => d.target.y);
+        node
+          .attr('transform', d => {
+            // Clamp node positions to stay within the SVG area
+            let r = d.type === 'funding' ? rectW/2 : circleR;
+            d.x = Math.max(r, Math.min(width - r, d.x));
+            d.y = Math.max(r, Math.min(height - r, d.y));
+            return `translate(${d.x},${d.y})`;
+          });
+      });
+    }
+  </script>
+</body>
+</html>
